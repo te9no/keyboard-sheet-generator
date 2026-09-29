@@ -7,3 +7,30 @@
 .template-tenkey .feature-tag{border-color:#b42ed5;color:#b42ed5}
 .template-blank .feature-tag,.template-ttt .feature-tag{border-color:var(--ink);color:var(--ink)}
 @media(max-width:560px){.feature-field{margin-top:0}}
+
+.sheet-card .sheet-user-image{display:block;position:absolute;height:auto;max-width:none;z-index:2;object-fit:contain}
+.image-fields{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.image-fields legend,.image-fields>label{font-size:.8rem;color:var(--muted)}
+.image-fields input[type=file]{display:block;max-width:100%;margin-top:8px}
+.image-editor{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:8px}
+.image-editor>img{width:52px;height:52px;object-fit:contain;background:#f1f4f3}
+.image-editor>strong{font-size:.8rem;overflow-wrap:anywhere}
+.image-controls,.image-editor>.button-row{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.image-controls label{flex:1;min-width:70px;font-size:.7rem;color:var(--muted)}
+.image-controls input{display:block;width:100%;padding:6px;border:1px solid #ccd6d4;border-radius:5px}
+.image-editor button{font-size:.7rem;padding:6px}
+#image-status{font-size:.8rem;margin-top:8px}
+#storage-status{padding:12px;background:#fff0dc;color:#824214;text-align:center}
+
+/* Real SVG marks print even with browser background graphics disabled. */
+.sheet-card:has(>.sheet-band)::before,.sheet-card:has(>.sheet-band-hidden)::before{display:none}
+.sheet-card>.sheet-band{position:absolute;left:0;top:0;width:100%;height:10px;display:block}
+.band-picker{margin:0 0 20px;padding:14px;border:1px solid var(--line);border-radius:9px}
+.band-picker legend{font-size:.8rem;color:var(--ink);font-weight:700}
+.band-picker>label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.75rem;color:var(--muted)}
+.band-picker select{font:inherit;max-width:65%;padding:6px;border:1px solid #ccd6d4;border-radius:5px;background:white;color:var(--ink)}
+.band-samples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.band-samples button{min-width:0;padding:12px 10px 8px;text-align:left;overflow:hidden}
+.band-samples .sheet-band{display:block;width:528px;height:10px;max-width:none}
+.band-samples span{display:block;margin-top:7px;font-size:.72rem}
+.band-samples button[aria-pressed=true]{border-color:#111;box-shadow:0 0 0 1px #111;background:#f1f1f1}

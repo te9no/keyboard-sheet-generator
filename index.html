@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="キーボード展示用の紹介シートをかんたんに作成・印刷できます。">
-  <title>Keyboard Sheet Generator</title>
+  <title>Keyboard Sheet Generator — te9no fork</title>
   <link rel="stylesheet" href="css/app.css">
   <link rel="stylesheet" href="css/selection.css">
   <link rel="stylesheet" href="css/print.css">
@@ -23,6 +23,7 @@
       <div class="panel-heading"><div><p class="eyebrow">EDITOR</p><h2 id="editor-title">紹介シートを作成</h2></div></div>
       <fieldset class="template-picker"><legend>テンプレート</legend><label class="template-option"><input type="radio" name="template" value="blank" checked> <span>基本デザイン</span></label><label class="template-option"><input type="radio" name="template" value="nagare"> <span>ながれキー</span></label><label class="template-option"><input type="radio" name="template" value="tenkey"> <span>天キーVol.12</span></label><label class="template-option"><input type="radio" name="template" value="ttt"> <span>Touch,Type＆Talkey</span></label></fieldset><label class="event-logo-toggle"><input type="checkbox" id="show-event-logo" checked> 右上のイベントロゴを表示</label>
       <form id="sheet-form" novalidate>
+        <fieldset class="band-picker"><legend>帯のデザイン</legend><label>このシートの帯<select id="bandStyle" name="bandStyle"><option value="original">テンプレート標準</option><option value="diagonal">スラッシュ</option><option value="checker">チェッカー</option><option value="dots">ドット</option><option value="circuit">サーキット</option><option value="chevron">シェブロン</option><option value="barcode">バーコード</option><option value="none">帯なし</option></select></label><div id="band-samples" class="band-samples" aria-label="モノクロ帯の見本"></div><p class="hint">白と黒だけで構成した6種類の帯です。見本を押して選択できます。4面付けには保存済みのデザインが反映されます。</p></fieldset>
         <div class="form-grid">
           <label>キーボード名<input id="keyboardName" name="keyboardName" maxlength="80"></label>
           <label>オーナー名<input id="exhibitor" name="exhibitor" maxlength="80"></label>
@@ -35,14 +36,15 @@
           <fieldset><legend>撮影・SNS投稿</legend><label><input type="radio" name="photo" value="ok"> OK</label><label><input type="radio" name="photo" value="ng"> NG</label></fieldset>
         </div>
         <label>自由記入欄<textarea id="description" name="description" rows="5" placeholder="このキーボードの紹介や、こだわりポイントなど"></textarea><small class="field-hint">5行以内に収まるように調整してください。</small></label>
+        <fieldset class="image-fields"><legend>画像・ロゴ・QRコード</legend><label>画像を追加<input type="file" id="sheet-image-file" accept="image/png,image/jpeg,image/webp" multiple></label><p class="hint">PNG・JPEG・WebPを6枚まで追加できます。画像は縦横比を保って表示します。位置と幅を調整して、文字と重ならないようプレビューで確認してください。</p><div id="image-status" role="status"></div><div id="sheet-image-list"></div></fieldset>
         <div class="actions"><button type="submit" class="primary">シートを保存</button><button type="button" id="new-sheet">新しく追加</button></div>
       </form>
       <div class="saved-sheets"><div class="list-heading"><h3>作成済みシート</h3><div class="list-actions"><button type="button" id="select-all" class="quiet">すべて選択</button><button type="button" id="deselect-all" class="quiet">すべて解除</button><button type="button" id="clear-all" class="quiet danger">すべてクリア</button></div></div><div id="sheet-list" class="sheet-list"></div></div>
     </section>
-    <section class="preview-column" aria-labelledby="preview-title"><div class="preview-label"><p class="eyebrow">PREVIEW</p><h2 id="preview-title">A6 横プレビュー</h2></div><div id="preview-stage" class="preview-stage"><div class="preview-frame"><div id="preview-card" class="sheet-card print-sheet template-blank" aria-label="紹介シートプレビュー"></div></div></div><div class="print-actions"><h3>印刷</h3><div class="button-row"><button type="button" id="print-all">A4・4面付け印刷</button><button type="button" id="print-blank">空欄シートを印刷</button></div><p class="hint">A4・4面付け印刷は、「作成済みシート」欄の中で選択されたシートが印刷されます。</p><p class="hint">印刷設定では倍率100%、A4横、余白なしを推奨します。</p></div></section>
+    <section class="preview-column" aria-labelledby="preview-title"><div class="preview-label"><p class="eyebrow">PREVIEW</p><h2 id="preview-title">A6 横プレビュー</h2></div><div id="preview-stage" class="preview-stage"><div class="preview-frame"><div id="preview-card" class="sheet-card print-sheet template-blank" aria-label="紹介シートプレビュー"></div></div></div><div class="print-actions"><h3>SVG出力</h3><div class="button-row"><button type="button" id="export-svg">SVGで保存</button><button type="button" id="export-svg-a4">A4・4面付けSVGを作成</button></div><p class="hint">編集中のシートを、プレビューと同じサイズ（139.5 × 96 mm）のSVGで保存します。保存前の入力内容も反映されます。</p><p class="hint">4面付けは「作成済みシート」の選択分を使用します。編集後はシートを保存してください。A4横に4枚ずつ配置し、余った枠は空白になります。</p><div id="svg-pages" aria-live="polite"></div></div><div class="print-actions"><h3>印刷</h3><div class="button-row"><button type="button" id="print-all">A4・4面付け印刷</button><button type="button" id="print-blank">空欄シートを印刷</button></div><p class="hint">A4・4面付け印刷は、「作成済みシート」欄の中で選択されたシートが印刷されます。</p><p class="hint">印刷設定では倍率100%、A4横、余白なしを推奨します。</p></div></section>
   </main>
-  <footer class="privacy-note">入力内容はこのブラウザ内にのみ保存され、外部へ送信されません。</footer>
+  <p id="storage-status" role="alert" hidden></p><footer class="privacy-note">入力内容はこのブラウザ内にのみ保存され、外部へ送信されません。<br><a href="https://github.com/te9no/keyboard-sheet-generator">te9no fork</a> · <a href="https://github.com/alektor-diy/keyboard-sheet-generator">元のプロジェクト（アレくとーる）</a></footer>
   <div id="print-root" aria-hidden="true"></div>
-  <script src="js/storage.js"></script><script src="js/card.js"></script><script src="js/print.js"></script><script src="js/app.js"></script>
+  <script src="js/bands.js"></script><script src="js/images.js"></script><script src="js/storage.js"></script><script src="js/card.js"></script><script src="js/print.js"></script><script src="js/svg.js"></script><script src="js/app.js"></script>
 </body>
 </html>
