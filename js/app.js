@@ -7,12 +7,34 @@
   function save(){state.current=current();SheetStorage.save(state);}
   function syncPreviewScale(){const stage=$('preview-stage');const frame=stage?.querySelector('.preview-frame');if(!stage||!frame)return;const scale=stage.clientWidth/frame.offsetWidth;frame.style.setProperty('--preview-scale',scale);stage.style.height=`${frame.offsetHeight*scale}px`;}
   function render(){const sheet=current();state.current=sheet;const preview=$('preview-card');preview.className=`sheet-card print-sheet template-${state.template}`;preview.innerHTML=SheetCard.markup(sheet,state.template,false,state.showEventLogo);SheetCard.fitKeyboardName(preview,true);syncPreviewScale();document.querySelectorAll('#band-samples button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.band===sheet.bandStyle)));renderList();SheetStorage.save(state);}
-  function renderList(){const list=$('sheet-list');list.replaceChildren();if(!state.sheets.length){list.innerHTML='<p class="hint">まだ保存されたシートはありません。</p>';return;}state.sheets.forEach(sheet=>{const row=document.createElement('div');row.className='sheet-row';row.innerHTML=`<input type="checkbox" data-action="select" data-id="${sheet.id}"${selectedIds.has(sheet.id)?' checked':''} aria-label="${escapeHtml(sheet.keyboardName||'（名称未入力）')}を印刷対象にする"><strong>${escapeHtml(sheet.keyboardName||'（名称未入力）')}</strong><button data-action="edit" data-id="${sheet.id}">編集</button><button data-action="copy" data-id="${sheet.id}">複製</button><button data-action="delete" data-id="${sheet.id}" class="quiet danger">削除</button>`;list.append(row);});}
-  function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function renderList(){
+    const list=$('sheet-list');list.replaceChildren();
+    if(!state.sheets.length){
+      const hint=document.createElement('p');hint.className='hint';
+      hint.textContent='まだ保存されたシートはありません。';list.append(hint);return;
+    }
+    state.sheets.forEach(sheet=>{
+      const row=document.createElement('div');row.className='sheet-row';
+      const name=String(sheet.keyboardName||'（名称未入力）');
+      const select=document.createElement('input');select.type='checkbox';
+      select.dataset.action='select';select.dataset.id=sheet.id;
+      select.checked=selectedIds.has(sheet.id);
+      select.setAttribute('aria-label',`${name}を印刷対象にする`);
+      const title=document.createElement('strong');title.textContent=name;
+      row.append(select,title);
+      for(const [action,label] of [['edit','編集'],['copy','複製'],['delete','削除']]){
+        const button=document.createElement('button');button.type='button';
+        button.dataset.action=action;button.dataset.id=sheet.id;button.textContent=label;
+        if(action==='delete')button.className='quiet danger';
+        row.append(button);
+      }
+      list.append(row);
+    });
+  }
   form.addEventListener('input',()=>{save();render();});form.addEventListener('change',()=>{save();render();});form.addEventListener('submit',event=>{event.preventDefault();const sheet=current();if(!sheet.id)sheet.id=crypto.randomUUID();const index=state.sheets.findIndex(item=>item.id===sheet.id);if(index<0)state.sheets.push(sheet);else state.sheets[index]=sheet;selectedIds.add(sheet.id);activeId=sheet.id;state.current=sheet;SheetStorage.save(state);renderList();});
   $('new-sheet').onclick=()=>put(SheetStorage.blankSheet());document.querySelectorAll('[name=template]').forEach(radio=>radio.onchange=()=>{state.template=radio.value;render();});
   $('sheet-list').addEventListener('change',event=>{const input=event.target.closest('input[data-action="select"]');if(!input)return;if(input.checked)selectedIds.add(input.dataset.id);else selectedIds.delete(input.dataset.id);});
-  $('sheet-list').onclick=event=>{const button=event.target.closest('button');if(!button)return;const sheet=state.sheets.find(item=>item.id===button.dataset.id);if(button.dataset.action==='edit')put(sheet);if(button.dataset.action==='copy'){const copy={...sheet,id:crypto.randomUUID()};state.sheets.push(copy);selectedIds.add(copy.id);put(copy);save();}if(button.dataset.action==='delete'&&confirm('このシートを削除しますか？')){state.sheets=state.sheets.filter(item=>item.id!==sheet.id);selectedIds.delete(sheet.id);if(activeId===sheet.id)put(SheetStorage.blankSheet());else render();}};
+  $('sheet-list').onclick=event=>{const button=event.target.closest('button');if(!button)return;const sheet=state.sheets.find(item=>item.id===button.dataset.id);if(!sheet)return;if(button.dataset.action==='edit')put(sheet);if(button.dataset.action==='copy'){const copy={...sheet,id:crypto.randomUUID()};state.sheets.push(copy);selectedIds.add(copy.id);put(copy);save();}if(button.dataset.action==='delete'&&confirm('このシートを削除しますか？')){state.sheets=state.sheets.filter(item=>item.id!==sheet.id);selectedIds.delete(sheet.id);if(activeId===sheet.id)put(SheetStorage.blankSheet());else render();}};
   $('select-all').onclick=()=>{state.sheets.forEach(sheet=>selectedIds.add(sheet.id));renderList();};$('deselect-all').onclick=()=>{selectedIds.clear();renderList();};
   $('clear-all').onclick=()=>{if(confirm('作成済みシートと編集中の内容をすべて削除しますか？')){state.sheets=[];selectedIds.clear();put(SheetStorage.blankSheet());}};
   $('print-all').onclick=()=>{const selected=state.sheets.filter(sheet=>selectedIds.has(sheet.id));if(!selected.length){alert('印刷対象のシートを1つ以上選択してください。');return;}alert('印刷プレビューで、各シートのレイアウトや文字の収まりを目視で確認してください。');SheetPrint.all(selected,state.template,state.showEventLogo);};$('print-blank').onclick=()=>SheetPrint.blank(state.template,state.showEventLogo,current().bandStyle);
